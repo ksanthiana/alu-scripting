@@ -1,26 +1,35 @@
 #!/usr/bin/python3
 """
- A function that queries the Reddit API and prints the titles of the first 10 hot posts listed.
+function that queries the Reddit API.
 """
-
 import requests
 
 
-def top_ten(subreddit):
-    """Prints the top ten hot posts for a given subreddit"""
+def number_of_subscribers(subreddit):
+    """
+    Queries the Reddit API for the number of subscribers for a given subreddit.
 
-    url = "https://www.reddit.com/r/{}/hot.json?limit=10".format(subreddit)
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
-    response = requests.get(url, headers=headers)
+    Args:
+        subreddit (str): The subreddit to query.
 
-    if response.status_code != 200:
-        print(None)
-        return
+    Returns:
+        int: The number of subscribers for the subreddit,
+    or 0 if the subreddit is invalid.
+    """
+    url = "https://www.reddit.com/r/{}/about.json".format(subreddit)
+    headers = {'User-Agent': 'python3:0-subs:v1.0 (by /u/yourusername)'}
 
-    data = response.json().get("data")
-    if data is None or len(data.get("children")) == 0:
-        print(None)
-        return
+    response = requests.get(url, headers=headers, allow_redirects=False)
+    if response.status_code == 200:
+        return response.json().get('data', {}).get('subscribers', 0)
+    else:
+        return 0
 
-    for child in data.get("children"):
-        print(child.get("data").get("title"))
+
+if __name__ == "__main__":
+    import sys
+
+    if len(sys.argv) < 2:
+        print("Please pass an argument for the subreddit to search.")
+    else:
+        print("{:d}".format(number_of_subscribers(sys.argv[1])))
